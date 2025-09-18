@@ -91,4 +91,5 @@ if args.force or images_empty or not (sparse_dir / "cameras.bin").exists() or no
     subprocess.run(process)
     print("")
 
-print ("DONE")
+print("SfM DONE")
+print("")

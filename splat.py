@@ -73,4 +73,5 @@ if args.force or not (args.splats / "point_cloud" / "iteration_30000" / "point_c
     subprocess.run(process)
     print("")
 
-print ("DONE")
+print("splats DONE")
+print("")

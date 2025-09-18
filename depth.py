@@ -56,4 +56,5 @@ if args.force or depths_empty:
         subprocess.run(process)
         print("")
 
-print ("DONE")
+print("depths DONE")
+print("")
