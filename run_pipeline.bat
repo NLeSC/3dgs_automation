@@ -22,10 +22,8 @@ set gs=D:\gaussian-splatting\
 set env_da=depth_anything
 set da2=D:\Depth-Anything-V2\
 
-set fps=2.5
 
-
-set command=python sfm.py --gs %gs% --fps %fps% %args%
+set command=python sfm.py --gs %gs% %args%
 echo Calling: "%command%"
 call conda activate %env_gs% & %command%
 
