@@ -166,40 +166,50 @@ unless the optional `--force` argument is used.
 
 
 ### Compute Structure from Motion
+Structure from Motion computes the camera parameters using COLMAP.
+The output is based on images, if they're present, or frames from a video.
+
 ```(cmd)
 conda activate gaussian_splatting
-python sfm.py [absolute\path\to\data\root\]
+python sfm.py <absolute\path\to\data\root\> [arguments]
 ```
 
-or set the directories in `run_sfm.bat` and call
+or set the arguments in `run_sfm.bat` and call
 ```(cmd)
-run_sfm.bat [absolute\path\to\data\root\]
+run_sfm.bat <absolute\path\to\data\root\>
 ```
 
 ### Compute Depths (optional)
+Depth images are computed using Depth-Anything-V2.
+Note that this requires some dependencies with incompatible versions in a different conda
+environment.
+
 ```(cmd)
 conda activate depth_anything
-python depth.py [absolute\path\to\data\root\]
+python depth.py <absolute\path\to\data\root\> [arguments]
 ```
 
-or set the directories in `run_depth.bat` and call
+or set the arguments in `run_depth.bat` and call
 ```(cmd)
-run_depth.bat [absolute\path\to\data\root\]
+run_depth.bat <absolute\path\to\data\root\>
 ```
 
 ### Compute Splats
+3D Gaussian splats are computed using gaussian_splatting.
+If depth images are present, this may first compute the depth scale parameters.
+
 ```(cmd)
 conda activate gaussian_splatting
-python splat.py [absolute\path\to\data\root\]
+python splat.py <absolute\path\to\data\root\> [arguments]
 ```
 
-or set the directories in `run_splat.bat` and call
+or set the arguments in `run_splat.bat` and call
 ```(cmd)
-run_splat.bat [absolute\path\to\data\root\]
+run_splat.bat <absolute\path\to\data\root\>
 ```
 
 ### Compute full pipeline
-set the directories in `run_pipeline.bat` and call
+set the arguments in `run_pipeline.bat` and call
 ```(cmd)
-run_pipeline.bat [absolute\path\to\data\root\]
+run_pipeline.bat <absolute\path\to\data\root\>
 ```
