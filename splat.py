@@ -46,7 +46,7 @@ if not (sparse_dir / "cameras.bin").exists() or not (sparse_dir / "images.bin").
 
 # If there are depth images without a params file, compute it.
 depths_empty = True
-for image in args.depths.glob("*.png"):
+for image in args.depths.rglob("*.png"):
     depths_empty = False
     break
 if not depths_empty and (args.force or not (sparse_dir / "depth_params.json").exists()):
