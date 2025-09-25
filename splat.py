@@ -53,7 +53,8 @@ if not depths_empty and (args.force or not (sparse_dir / "depth_params.json").ex
     print(f"Depth images found in {args.depths}: computing params file...")
 
     process = ["python", f"{(args.gs / 'utils' / 'make_depth_scale.py').resolve()}", "--base_dir", f"{args.data}", "--depths_dir", f"{args.depths}"]
-    print(f"Calling: {process}")
+    process_str = " ".join(process)
+    print(f"Calling: {process_str}")
     subprocess.run(process)
     print("")
 
@@ -69,7 +70,8 @@ if args.force or not (args.splats / "point_cloud" / "iteration_30000" / "point_c
         process.extend(["--exposure_lr_init", "0.001", "--exposure_lr_final", "0.0001", "--exposure_lr_delay_steps", "5000", "--exposure_lr_delay_mult", "0.001", "--train_test_exp"])
     if not depths_empty and (sparse_dir / "depth_params.json").exists():
         process.extend(["--depths", f"{args.depths}"])
-    print(f"Calling: {process}")
+    process_str = " ".join(process)
+    print(f"Calling: {process_str}")
     subprocess.run(process)
     print("")
 

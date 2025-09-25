@@ -27,7 +27,7 @@ parser.add_argument("--frames", "-f", help="Input frames directory path (default
 parser.add_argument("--resize", help="Resize the images during SfM.", action='store_true')
 parser.add_argument("--force", help="Force recomputing the camera parameters.", action='store_true')
 parser.add_argument("--video", "-v", help="Input video file path.", type=Path)
-parser.add_argument("--fps", help="Frames per second to extract from video (default: %(default)s).", type=float, default=1)
+parser.add_argument("--fps", help="Frames per second to extract from video (default: %(default)s).", type=float, default=5) # TODO(tvl): default temp at 5 for testing
 
 args = parser.parse_args()
 
@@ -41,13 +41,15 @@ if not args.frames.is_dir():
 
 # If the frames directory is empty, try to extract frames from a video file.
 frames_empty = True
-for image in args.frames.glob("*.jpg"):
+for image in args.frames.rglob("*.jpg"):
     frames_empty = False
     break
 if frames_empty:
     print("Input frames not found: locating input video...")
-    if not args.video:
-        videos = []
+    videos = []
+    if args.video:
+        videos.append(args.video)
+    else:
         video_dir = args.data / "raw"
         if video_dir.exists() and video_dir.is_dir():
             for video in video_dir.glob("*.mpeg"):
@@ -56,38 +58,49 @@ if frames_empty:
                 videos.append(video)
             for video in video_dir.glob("*.mp4"):
                 videos.append(video)
-        if len(videos) == 1:
-            args.video = videos[0]
-        elif len(videos) > 1:
-            print(f"{video_dir} contains multiple video files. Please specify the video file path to use.")
-            sys.exit()
-    if not args.video:
+    if len(videos) == 0:
         print("Neither input frames or video file found...")
         sys.exit()
 
-    print(f"Extracting frames from video {args.video} using FFMPEG...")
-    frames = args.frames / "%04d.jpg"
-    process = ["ffmpeg", "-i", f"{args.video}", "-qscale:v", "1", "-qmin", "1", "-vf", f"fps={args.fps}", f"{frames}"]
-    print(f"Calling: {process}")
-    subprocess.run(process)
-    print("")
+    video_str = f"video {videos[0]}" if len(videos) == 1 else f"{len(videos)} videos"
+    print(f"Extracting frames from {video_str} using FFMPEG...")
+    for i in range(len(videos)):
+        frames = args.frames
+        if len(videos) > 1:
+            frames = frames / f"{i}"
+            frames.mkdir(parents=True)
+        frames = frames / "%04d.jpg"
+        process = ["ffmpeg", "-i", f"{videos[i]}", "-qscale:v", "1", "-qmin", "1", "-vf", f"fps={args.fps}", f"{frames}"]
+        process_str = " ".join(process)
+        print(f"Calling: {process_str}")
+        subprocess.run(process)
+        print("")
 
 # If the SfM output does not exist, compute it.
 images_empty = True
-for image in (args.data / "images").glob("*.jpg"):
+for image in (args.data / "images").rglob("*.jpg"):
     images_empty = False
     break
 sparse_dir = args.data / "sparse" / "0"
 if args.force or images_empty or not (sparse_dir / "cameras.bin").exists() or not (sparse_dir / "images.bin").exists() or not (sparse_dir / "points3D.bin").exists():
     print("Computing camera parameters using COLMAP...")
-    if not args.gs or not (args.gs / "convert.py").exists():
-        print("Missing path to Gaussian Splatting convert.py script.")
+    multi_camera = False
+    for frame in args.frames.rglob("*.jpg"):
+        multi_camera = True
+        break
+    for frame in args.frames.glob("*.jpg"):
+        multi_camera = False
+        break
+    convert = "convert_multi.py" if multi_camera else "convert.py"
+    if not args.gs or not (args.gs / convert).exists():
+        print(f"Missing path to Gaussian Splatting {convert} script.")
         sys.exit()
 
-    process = ["python", f"{(args.gs / 'convert.py').resolve()}", "--source_path", f"{args.data}"]
+    process = ["python", f"{(args.gs / convert).resolve()}", "--source_path", f"{args.data}"]
     if args.resize:
         process.append("--resize")
-    print(f"Calling: {process}")
+    process_str = " ".join(process)
+    print(f"Calling: {process_str}")
     subprocess.run(process)
     print("")
 

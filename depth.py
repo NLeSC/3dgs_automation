@@ -40,7 +40,7 @@ if not args.images.exists() or not args.images.is_dir():
 
 # If the depths directory is empty, compute the depth images.
 depths_empty = True
-for image in (args.depths).glob("*.png"):
+for image in (args.depths).rglob("*.png"):
     depths_empty = False
     break
 if args.force or depths_empty:
@@ -49,12 +49,20 @@ if args.force or depths_empty:
         print("Missing path to Depth-Anything-V2 run.py script.")
         sys.exit()
 
-    process = [ "python", "run.py", "--encoder", "vitl", "--pred-only", "--grayscale", "--img-path", f"{args.images}", "--outdir", f"{args.depths}"]
-    print(f"Calling: {process}")
-    print(f"from {args.da2}")
-    with chdir(args.da2):
-        subprocess.run(process)
-        print("")
+    image_dirs = set()
+    for image in (args.images).rglob("*.jpg"):
+        image_dirs.add(image.parent)
+    for image_dir in image_dirs:
+        outdir = args.depths
+        if len(image_dirs) > 1:
+            outdir = outdir / image_dir.name
+        process = [ "python", "run.py", "--encoder", "vitl", "--pred-only", "--grayscale", "--img-path", f"{image_dir}", "--outdir", f"{outdir}"]
+        process_str = " ".join(process)
+        print(f"Calling: {process_str}")
+        print(f"from {args.da2}")
+        with chdir(args.da2):
+            subprocess.run(process)
+            print("")
 
 print("depths DONE")
 print("")
