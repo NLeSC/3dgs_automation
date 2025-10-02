@@ -17,8 +17,6 @@
 set args=%*
 
 set env=depth_anything
-set da2=D:\Depth-Anything-V2\
-
-set command=python depth.py --da2 %da2% %args%
+set command=python depth.py %args%
 echo Calling: "%command%"
 call conda activate %env% & %command%

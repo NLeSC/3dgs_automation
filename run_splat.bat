@@ -17,8 +17,6 @@
 set args=%*
 
 set env=gaussian_splatting
-set gs=D:\gaussian-splatting\
-
-set command=python splat.py --gs %gs% --train_exposure %args%
+set command=python splat.py %args%
 echo Calling: "%command%"
 call conda activate %env% & %command%

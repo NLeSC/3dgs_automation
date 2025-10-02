@@ -17,8 +17,6 @@
 set args=%*
 
 set env=gaussian_splatting
-set gs=D:\gaussian-splatting\
-
-set command=python sfm.py --gs %gs% %args%
+set command=python sfm.py %args%
 echo Calling: "%command%"
 call conda activate %env% & %command%
