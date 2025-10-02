@@ -13,15 +13,6 @@ because that is the type of Windows system available to us on Research Cloud.
 #### git
 Download git from `https://git-scm.com/downloads/win` and install it.
 
-##### GitHub
-Create a new ssh key on the workspace.
-from `https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key`
-```(cmd)
-ssh-keygen -t ed25519 -C "<your_email>"
-```
-Add the public key to your github account.
-* the public key should be in `C:\Users\<username>\.ssh\id_ed25519.pub`
-
 #### conda
 Download mamba from `https://github.com/conda-forge/miniforge` and install it.
 * Preferably on an attached storage drive, because conda takes up a huge amount of space.
@@ -39,22 +30,20 @@ Note that gaussian-splating is not compatible with later Visual Studio versions.
 Download VS Community from `https://aka.ms/vs/16/release/vs_community.exe` and install it
 * Make sure to enable Desktop development with C++
 
+After installation, make sure `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64` is in the PATH.
+
 #### CUDA 11.8
 Note that a Research Cloud workspace comes with CUDA 12 installed,
 but gaussian-splating is not compatible with this version.
 
 Download CUDA toolkit 11.8 from
 `https://developer.nvidia.com/cuda-11-8-0-download-archive` and install it.
+This installation depends on the Visual Studio installation.
 * Note that the installer may mention that Nsight was not replaced by a newer version
   check that the current version is 11.8
 ```(cmd)
 nvcc --version
 ```
-
-##### CUDA 12.3.2
-The SIBR viewer pre-built binaries may require CUDA 12.
-Download CUDA toolkit 12.3.2 (the last version to support Windows Server 2019) from
-`https://developer.nvidia.com/cuda-12-3-2-download-archive`
 
 #### COLMAP
 Download COLMAP with CUDA from `https://github.com/colmap/colmap/releases`
@@ -78,15 +67,35 @@ Download FFMPEG essentials from `https://www.gyan.dev/ffmpeg/builds/`
 Extract the 7z file to `<user>\FFMPEG\`
 Add `<user>\FFMPEG\bin\` to the Local Path.
 
-#### CMake 3.24
-Download `	cmake-3.24.4-windows-x86_64.msi` from `https://cmake.org/files/v3.24/` and
-install it.
-
 #### Reboot
 At this point, you'll want to restart the machine for several of the changes to take
 effect.
 
-#### Depth Anything v2
+### Gaussian Splatting source
+Clone the repository.
+Note the repository is cloned recusively, because it has several submodules.
+```(cmd)
+git clone https://github.com/graphdeco-inria/gaussian-splatting.git --recursive
+```
+
+Install dependencies, including the accellerated rasterizer.
+Note that diff-gaussian-rasterization depends on the external CUDA installation.
+```(cmd)
+conda activate base
+SET DISTUTILS_USE_SDK=1
+cd gaussian-splatting\submodules\diff-gaussian-rasterization
+git checkout 3dgs_accel
+cd ..\..
+conda env create --file environment.yml
+conda activate gaussian_splatting
+```
+
+If you run into an error with `shm.dll`, like
+`Error loading "[...]\miniforge3\envs\gaussian_splatting\lib\site-packages\torch\lib\shm.dll" or one of its dependencies.`
+this may be solved by running `pip install intel-openmp` in the gaussian_splatting environment and, before again calling
+`conda env create --file environment.yml` for the pip install parts.
+
+### Depth Anything v2
 Note that the repository with weights takes up about 1.35GB and its dependencies about 1.85GB. This is somewhat restrictive on the cloud storage.
 
 Clone repository:
@@ -95,7 +104,8 @@ git clone https://github.com/DepthAnything/Depth-Anything-V2.git
 ```
 Download weights from `https://huggingface.co/depth-anything/Depth-Anything-V2-Large/resolve/main/depth_anything_v2_vitl.pth?download=true` and place them under `Depth-Anything-V2/checkpoints/`
 
-Install dependencies
+Install dependencies.
+Note that this has to be a different environment to gaussian_splatting (later), because they require different versions of python.
 ```(cmd)
 conda create -n depth_anything
 conda activate depth_anything
@@ -103,32 +113,8 @@ conda install python
 pip install -r Depth-Anything-V2\requirements.txt
 ```
 
-### Gaussian Splatting source
-Clone the repository.
-Note the repository is cloned recusively, because it has several submodules.
-```(cmd)
-git clone git@github.com:graphdeco-inria/gaussian-splatting.git --recursive
-```
-
-Install packages using conda
-```(cmd)
-conda activate
-SET DISTUTILS_USE_SDK=1
-cd gaussian-splatting\
-conda env create --file environment.yml
-conda activate gaussian_splatting
-```
-
-Install the accelerated rasterizer to enable increased training speed:
-```(cmd)
-pip uninstall diff-gaussian-rasterization -y
-cd submodules/diff-gaussian-rasterization
-rmdir /S build
-git checkout 3dgs_accel
-pip install .
-```
-
 ### GaussianSplats3D viewer
+
 #### From source
 Either install node.js from `http://nodejs.org/`
 or:
@@ -146,7 +132,7 @@ npm run build-windows
 
 Clone repository
 ```(cmd)
-git clone git@github.com:mkkellogg/GaussianSplats3D.git
+git clone https://github.com/mkkellogg/GaussianSplats3D.git
 ```
 
 Demo:
@@ -158,6 +144,7 @@ npm run demo
 
 #### Online viewer
 Open `https://projects.markkellogg.org/threejs/demo_gaussian_splats_3d.php`
+
 
 
 ## Process dataset
