@@ -14,6 +14,7 @@
 
 
 import argparse
+import configparser
 from contextlib import chdir
 from pathlib import Path
 import subprocess
@@ -22,45 +23,50 @@ import sys
 # Note, the executables have dependencies in the depth_anything conda environment.
 
 parser = argparse.ArgumentParser(description="Compute depth images using Depth-Anything-V2.")
-parser.add_argument("data", help="Data root path.", type=Path)
-parser.add_argument("--da2", help="Depth-Anything-V2 root path.", type=Path)
-parser.add_argument("--images", "-i", help="Input images directory path (default: <data>\\images).", type=Path)
-parser.add_argument("--depths", "-d", help="Output depth images directory path (default: <data>\\depths).", type=Path)
-parser.add_argument("--force", help="Force recomputing the depth images.", action='store_true')
-
+parser.add_argument("config", help="Config file path.", type=Path)
 args = parser.parse_args()
 
-if not args.images:
-    args.images = args.data / "images"
-if not args.depths:
-    args.depths = args.data / "depths"
-if not args.images.exists() or not args.images.is_dir():
-    print(f"Input directory {args.images} is not a directory.")
+config = configparser.ConfigParser()
+config.read(args.config)
+
+da_dir = Path(config["software"].get("depth_anything_root_dir"))
+
+data = config["data"]
+data_dir = Path(data.get("root_dir"))
+images_dir = Path(data.get("images_dir", data_dir / "images"))
+depths_dir = Path(data.get("depths_dir", data_dir / "depths"))
+
+depths = config["depths"]
+depths_force = depths.getboolean("force", False)
+
+
+if not images_dir.is_dir():
+    print(f"Input directory {images_dir} is not a directory.")
     sys.exit()
 
 # If the depths directory is empty, compute the depth images.
 depths_empty = True
-for image in (args.depths).rglob("*.png"):
+for image in depths_dir.rglob("*.png"):
     depths_empty = False
     break
-if args.force or depths_empty:
+if depths_force or depths_empty:
     print("Computing depth images using Depth-Anything-V2...")
-    if not args.da2 or not (args.da2 / "run.py").exists():
+    if not da_dir or not (da_dir / "run.py").exists():
         print("Missing path to Depth-Anything-V2 run.py script.")
         sys.exit()
 
     image_dirs = set()
-    for image in (args.images).rglob("*.jpg"):
+    for image in images_dir.rglob("*.jpg"):
         image_dirs.add(image.parent)
     for image_dir in image_dirs:
-        outdir = args.depths
+        outdir = depths_dir
         if len(image_dirs) > 1:
             outdir = outdir / image_dir.name
         process = [ "python", "run.py", "--encoder", "vitl", "--pred-only", "--grayscale", "--img-path", f"{image_dir}", "--outdir", f"{outdir}"]
         process_str = " ".join(process)
         print(f"Calling: {process_str}")
-        print(f"from {args.da2}")
-        with chdir(args.da2):
+        print(f"from {da_dir}")
+        with chdir(da_dir):
             subprocess.run(process)
             print("")
 

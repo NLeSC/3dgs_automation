@@ -16,21 +16,6 @@
 :: The arguments must include the data directory; all are passed verbatim to each script.
 set args=%*
 
-set env_gs=gaussian_splatting
-set gs=D:\gaussian-splatting\
-
-set env_da=depth_anything
-set da2=D:\Depth-Anything-V2\
-
-
-set command=python sfm.py --gs %gs% %args%
-echo Calling: "%command%"
-call conda activate %env_gs% & %command%
-
-set command=python depth.py --da2 %da2% %args%
-echo Calling: "%command%"
-call conda activate %env_da% & %command%
-
-set command=python splat.py --gs %gs% --train_exposure %args%
-echo Calling: "%command%"
-call conda activate %env_gs% & %command%
+call run_sfm.bat   %args%
+call run_depth.bat %args%
+call run_splat.bat %args%
