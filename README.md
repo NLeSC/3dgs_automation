@@ -78,7 +78,7 @@ Note the repository is cloned recusively, because it has several submodules.
 git clone https://github.com/graphdeco-inria/gaussian-splatting.git --recursive
 ```
 
-Install dependencies, including the accellerated rasterizer.
+Install dependencies, including the accelerated rasterizer.
 Note that diff-gaussian-rasterization depends on the external CUDA installation.
 ```(cmd)
 conda activate base
