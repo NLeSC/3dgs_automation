@@ -149,21 +149,25 @@ Open `https://projects.markkellogg.org/threejs/demo_gaussian_splats_3d.php`
 
 ## Process dataset
 Note that these methods will skip parts for which output already exists,
-unless the optional `--force` argument is used.
+unless the optional `force` parameter is set.
 
+### Config File
+Any modifyable process parameters must be presented in a `.ini` config file.
+There is a config file template provided in `config.ini`.
+All available parameters are included in this template, either active or commented out.
 
 ### Compute Structure from Motion
 Structure from Motion computes the camera parameters using COLMAP.
 The output is based on images, if they're present, or frames from a video.
 
+EITHER
 ```(cmd)
 conda activate gaussian_splatting
-python sfm.py <absolute\path\to\data\root\> [arguments]
+python sfm.py <path\to\config.ini>
 ```
-
-or set the arguments in `run_sfm.bat` and call
+OR
 ```(cmd)
-run_sfm.bat <absolute\path\to\data\root\>
+run_sfm.bat <path\to\config.ini>
 ```
 
 ### Compute Depths (optional)
@@ -171,12 +175,12 @@ Depth images are computed using Depth-Anything-V2.
 Note that this requires some dependencies with incompatible versions in a different conda
 environment.
 
+EITHER
 ```(cmd)
 conda activate depth_anything
-python depth.py <absolute\path\to\data\root\> [arguments]
+python depth.py <path\to\config.ini>
 ```
-
-or set the arguments in `run_depth.bat` and call
+OR
 ```(cmd)
 run_depth.bat <absolute\path\to\data\root\>
 ```
@@ -185,18 +189,19 @@ run_depth.bat <absolute\path\to\data\root\>
 3D Gaussian splats are computed using gaussian_splatting.
 If depth images are present, this may first compute the depth scale parameters.
 
+EITHER
 ```(cmd)
 conda activate gaussian_splatting
-python splat.py <absolute\path\to\data\root\> [arguments]
+python splat.py <path\to\config.ini>
 ```
-
-or set the arguments in `run_splat.bat` and call
+OR
 ```(cmd)
-run_splat.bat <absolute\path\to\data\root\>
+run_splat.bat <path\to\config.ini>
 ```
 
 ### Compute full pipeline
-set the arguments in `run_pipeline.bat` and call
+Each of the above scripts is called in order.
+
 ```(cmd)
-run_pipeline.bat <absolute\path\to\data\root\>
+run_pipeline.bat <path\to\config.ini>
 ```
