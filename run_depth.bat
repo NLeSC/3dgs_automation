@@ -17,6 +17,6 @@
 set args=%*
 
 set env=depth_anything
-set command=python depth.py %args%
+set command=python 3dgs.py depth %args%
 echo Calling: "%command%"
 call conda activate %env% & %command%

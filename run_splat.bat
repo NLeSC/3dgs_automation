@@ -17,6 +17,6 @@
 set args=%*
 
 set env=gaussian_splatting
-set command=python splat.py %args%
+set command=python 3dgs.py splat %args%
 echo Calling: "%command%"
 call conda activate %env% & %command%
