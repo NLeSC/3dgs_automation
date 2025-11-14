@@ -91,14 +91,14 @@ def compute_sfm(gs_dir : Path, data_dir : Path, frames_dir : Path, images_dir : 
         print("")
 
 
-def compute_depths(da_dir : Path, images_dir : Path, depths_dir : Path, depths_force : bool):
+def compute_depths(da_dir : Path, images_dir : Path, depths_dir : Path, depths_enable : bool, depths_force : bool):
     # If the depths directory is empty, compute the depth images.
     # Note, this function has dependencies in the depth_anything conda environment.
     depths_empty = True
     for _ in depths_dir.rglob("*.png"):
         depths_empty = False
         break
-    if depths_force or depths_empty:
+    if depths_enable and (depths_force or depths_empty):
         print("Computing depth images using Depth-Anything-V2...")
         if not da_dir or not (da_dir / "run.py").exists():
             print("Missing path to Depth-Anything-V2 run.py script.")
@@ -215,6 +215,7 @@ def main():
             da_dir = Path(config["software"].get("depth_anything_root_dir")),
             images_dir = images_dir,
             depths_dir = Path(data.get("depths_dir", data_dir / "depths")),
+            depths_enable = config["depths"].getboolean("enable", False),
             depths_force = config["depths"].getboolean("force", False)
         )
 

@@ -37,6 +37,7 @@ images_dir = Path(data.get("images_dir", data_dir / "images"))
 depths_dir = Path(data.get("depths_dir", data_dir / "depths"))
 
 depths = config["depths"]
+depths_enable = depths.getboolean("enable", False)
 depths_force = depths.getboolean("force", False)
 
 
@@ -49,7 +50,7 @@ depths_empty = True
 for image in depths_dir.rglob("*.png"):
     depths_empty = False
     break
-if depths_force or depths_empty:
+if depths_enable and (depths_force or depths_empty):
     print("Computing depth images using Depth-Anything-V2...")
     if not da_dir or not (da_dir / "run.py").exists():
         print("Missing path to Depth-Anything-V2 run.py script.")
