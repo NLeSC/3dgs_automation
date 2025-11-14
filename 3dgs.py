@@ -173,6 +173,7 @@ def main():
     data = config["data"]
     data_dir = Path(data.get("root_dir"))
 
+
     if args.mode in ["sfm", "all"]:
         frames_dir = Path(data.get("frames_dir", data_dir / "input"))
 
@@ -202,6 +203,7 @@ def main():
         print("SfM DONE")
         print("")
 
+
     if args.mode in ["depth", "all"]:
         images_dir = Path(data.get("images_dir", data_dir / "images"))
 
@@ -218,6 +220,7 @@ def main():
 
         print("depths DONE")
         print("")
+
 
     if args.mode in ["splat", "all"]:
         sparse_dir = Path(data.get("sparse_dir", data_dir / "sparse" / "0"))
