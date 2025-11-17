@@ -15,15 +15,16 @@
 
 import argparse
 import configparser
-from contextlib import chdir
 from pathlib import Path
 import subprocess
 import sys
 
 
-def extract_frames(video_path : Path, frames_dir : Path, slice_fps : float, slice_force : bool):
+def extract_frames(video_path : Path, frames_dir : Path, slice_fps : float, slice_force : bool, slice_skip : bool):
     # If the frames directory is empty, try to extract frames from a video file.
     # Note, this function has dependencies in the gaussian_splatting conda environment.
+    if slice_skip: return
+
     frames_empty = True
     for _ in frames_dir.rglob("*.jpg"):
         frames_empty = False
@@ -58,9 +59,11 @@ def extract_frames(video_path : Path, frames_dir : Path, slice_fps : float, slic
             print("")
 
 
-def compute_sfm(gs_dir : Path, data_dir : Path, frames_dir : Path, images_dir : Path, sparse_dir : Path, sfm_resize : bool, sfm_force : bool):
+def compute_sfm(gs_dir : Path, data_dir : Path, frames_dir : Path, images_dir : Path, sparse_dir : Path, sfm_resize : bool, sfm_force : bool, sfm_skip : bool):
     # If the SfM output does not exist, compute it.
     # Note, this function has dependencies in the gaussian_splatting conda environment.
+    if sfm_skip: return
+
     images_empty = True
     for _ in images_dir.rglob("*.jpg"):
         images_empty = False
@@ -91,9 +94,11 @@ def compute_sfm(gs_dir : Path, data_dir : Path, frames_dir : Path, images_dir : 
         print("")
 
 
-def compute_depths(da_dir : Path, images_dir : Path, depths_dir : Path, depths_enable : bool, depths_force : bool):
+def compute_depths(da_dir : Path, images_dir : Path, depths_dir : Path, depths_enable : bool, depths_force : bool, depths_skip : bool):
     # If the depths directory is empty, compute the depth images.
     # Note, this function has dependencies in the depth_anything conda environment.
+    if depths_skip: return
+
     depths_empty = True
     for _ in depths_dir.rglob("*.png"):
         depths_empty = False
@@ -103,6 +108,8 @@ def compute_depths(da_dir : Path, images_dir : Path, depths_dir : Path, depths_e
         if not da_dir or not (da_dir / "run.py").exists():
             print("Missing path to Depth-Anything-V2 run.py script.")
             sys.exit()
+            
+        from contextlib import chdir
 
         image_dirs = set()
         for image in images_dir.rglob("*.jpg"):
@@ -120,7 +127,9 @@ def compute_depths(da_dir : Path, images_dir : Path, depths_dir : Path, depths_e
                 print("")
 
 
-def scale_depths(gs_dir : Path, data_dir : Path, sparse_dir : Path, depths_dir : Path, depths_force : bool):
+def scale_depths(gs_dir : Path, data_dir : Path, sparse_dir : Path, depths_dir : Path, depths_force : bool, depths_skip : bool):
+    if depths_skip: return
+
     # If there are depth images without a params file, compute it.
     # Note, this function has dependencies in the gaussian_splatting conda environment.
     depths_empty = True
@@ -187,7 +196,8 @@ def main():
             video_path = Path(data.get("video_path", data_dir / "raw")),
             frames_dir=frames_dir,
             slice_fps = config["slice"].getfloat("fps", 1.0),
-            slice_force = config["slice"].getboolean("force", False)
+            slice_force = config["slice"].getboolean("force", False),
+            slice_skip = config["slice"].getboolean("skip", False)
         )
 
         compute_sfm(
@@ -197,7 +207,8 @@ def main():
             images_dir = Path(data.get("images_dir", data_dir / "images")),
             sparse_dir = Path(data.get("sparse_dir", data_dir / "sparse" / "0")),
             sfm_resize = config["sfm"].getboolean("resize", False),
-            sfm_force = config["sfm"].getboolean("force", False)
+            sfm_force = config["sfm"].getboolean("force", False),
+            sfm_skip = config["sfm"].getboolean("skip", False)
         )
 
         print("SfM DONE")
@@ -216,7 +227,8 @@ def main():
             images_dir = images_dir,
             depths_dir = Path(data.get("depths_dir", data_dir / "depths")),
             depths_enable = config["depths"].getboolean("enable", False),
-            depths_force = config["depths"].getboolean("force", False)
+            depths_force = config["depths"].getboolean("force", False),
+            depths_skip = config["depths"].getboolean("skip", False)
         )
 
         print("depths DONE")
@@ -243,7 +255,8 @@ def main():
             data_dir = data_dir,
             sparse_dir = sparse_dir,
             depths_dir = Path(data.get("depths_dir", data_dir / "depths")),
-            depths_force = config["depths"].getboolean("force", False)
+            depths_force = config["depths"].getboolean("force", False),
+            depths_skip = config["depths"].getboolean("skip", False)
         )
 
         train_splats(
