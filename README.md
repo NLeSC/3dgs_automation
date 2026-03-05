@@ -163,7 +163,7 @@ The output is based on images, if they're present, or frames from a video.
 EITHER
 ```(cmd)
 conda activate gaussian_splatting
-python sfm.py <path\to\config.ini>
+python 3dgs.py sfm <path\to\config.ini>
 ```
 OR
 ```(cmd)
@@ -178,7 +178,7 @@ environment.
 EITHER
 ```(cmd)
 conda activate depth_anything
-python depth.py <path\to\config.ini>
+python 3dgs.py depth <path\to\config.ini>
 ```
 OR
 ```(cmd)
@@ -192,7 +192,7 @@ If depth images are present, this may first compute the depth scale parameters.
 EITHER
 ```(cmd)
 conda activate gaussian_splatting
-python splat.py <path\to\config.ini>
+python 3dgs.py splat <path\to\config.ini>
 ```
 OR
 ```(cmd)
